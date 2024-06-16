@@ -1,5 +1,6 @@
 package com.kirke.service.service;
 
+import com.kirke.service.model.KirkeReq;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pulsar.client.api.*;
 import org.json.JSONObject;
@@ -25,6 +26,9 @@ public class KirkePulsarListener {
 
     private Consumer<byte[]> consumer;
 
+    @Autowired
+    private KirkeService kirkeService;
+
 
 
     public void startListener() throws PulsarClientException {
@@ -39,9 +43,11 @@ public class KirkePulsarListener {
                             String message = new String(msg.getData());
                             log.info("Received Geofences From Topic : {}",topicName);
                             if ((isJsonObject(message))&&(message.contains("\"activityTypeName\": \"CONFIGURATION CHANGE\""))) {
+//                                log.info("Kirke Message: {}", message);
+                                consumer1.pause();
+                                processKirkeData(message);
+                                consumer1.resume();
 
-
-                                log.info("Kirke Message: {}", message);
 
 
                             }else{
@@ -63,6 +69,17 @@ public class KirkePulsarListener {
             log.info("Pulsar listener started");
         } else {
             log.info("Pulsar listener is already running. List Size");
+        }
+    }
+
+    private void processKirkeData(String message) {
+        try{
+            KirkeReq kirkeReq = kirkeService.convertJsonToKirkeReq(message);
+            log.info("KirkeReq :: {}",kirkeReq);
+            kirkeService.saveKirkeReq(kirkeReq);
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 

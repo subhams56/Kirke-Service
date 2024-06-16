@@ -17,10 +17,10 @@ public class DemoApplication {
 
 	@Bean
 	public ApplicationRunner kirkePulsarRunner(KirkePulsarListener kirkePulsarListener) {
-		return args -> {
+		return args ->
 			// Execute KirkePulsarListener.startListener() method on application startup
 			kirkePulsarListener.startListener();
-		};
+
 	}
 
 }
